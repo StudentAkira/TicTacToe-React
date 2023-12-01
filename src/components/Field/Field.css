@@ -1,5 +1,24 @@
 .field {
-  height: 300px;
-  width: 300px;
-  background-color: black;
+  width: 20.625rem;
+  height: 20.625rem;
+  border-radius: 0.9375rem;
+  background: var(--field-background-color);
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  align-items: center;
+  justify-items: center;
+
+  position: relative;
+}
+.winner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.winner__hidden {
+  display: none;
 }
