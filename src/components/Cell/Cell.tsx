@@ -1,10 +1,12 @@
+import { PlayerSymbol } from "../Field/Field";
+import PlayerMark from "../PlayerMark/PlayerMark";
 import "./Cell.css"
 
 
 export default function Cell(props: CellOptions) {
   return ( 
     <div className="cell" id={props.id} onClick={()=>{props.handleClick(+props.id)}}>
-      {props.svg_element}
+      <PlayerMark type={props.value}/>
     </div>
   );
 }
@@ -12,7 +14,6 @@ export default function Cell(props: CellOptions) {
 export interface CellOptions {
   key: number;
   id: string;
-  value: string;
+  value: PlayerSymbol | null;
   handleClick: (index: number) => void;
-  svg_element: JSX.Element;
 }

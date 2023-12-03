@@ -1,40 +1,57 @@
 import { useEffect, useState } from "react";
-import Cell from "../Cell/Cell";
 
-import Cross from "../Svg/Cross"
-import Circle from "../Svg/Circle"
+import Cell from "../Cell/Cell";
+import EndGameBanner from "../EndGameBanner/EndGameBanner";
 
 import "./Field.css"
+import { APIEndpoints } from "../../App";
 
 
 export default function Field() {
 
-  const playerCross = {symbol : PlayerSymbol.Cross}
-  const playerCircle = {symbol : PlayerSymbol.Circle}
+  const playerCross : Player = {symbol : PlayerSymbol.Cross}
+  const playerCircle : Player = {symbol : PlayerSymbol.Circle}
 
-  const [cells, setCells] = useState(new Array(9).fill(""));
-  const [svgs, setSvgs] = useState(new Array(9).fill(""))
+  const [cells, setCells] = useState<(PlayerSymbol | null)[]>(new Array<PlayerSymbol | null>(9).fill(null));
 
-  const [winner, setWinner] = useState<Player>();
-  const [player, setPlayer] = useState(playerCircle);//TODO default init must be understandble
+  const [player, setPlayer] = useState<Player>(playerCircle);
+  const [endGameMessage, setEndGameMessage] = useState<string|null>(null);
+  
+  const sendGameResult = (message : string) => {
 
-  const svg_coices = {
-    Cross : <Cross/>,
-    Circle: <Circle/>,
+    const formdata = new FormData();
+    formdata.append("result_code", GameResults[message as keyof typeof GameResults].result_code);
+    formdata.append("result_description", GameResults[message as keyof typeof GameResults].result_description);
+
+    console.log(GameResults[message as keyof typeof GameResults].result_code);
+    console.log(GameResults[message as keyof typeof GameResults].result_description);
+    
+
+    fetch(APIEndpoints.result, {
+      method: 'POST',
+      body: formdata,
+      redirect: 'manual'
+    })
+      .then(response => response.text())
+      .then(result => console.log(result))
+      .catch(error => console.log('error', error));
   }
 
   useEffect(() => {
     if (checkWin(player.symbol)){
-      console.log("WINNER IS :: ", player);
-      setWinner((player) => player);
+      setEndGameMessage("Player " + player.symbol + " wins");
+      sendGameResult("Player " + player.symbol + " wins");
       return;
     }
-
-    setPlayer(player.symbol === PlayerSymbol.Cross?() => playerCircle :()=> playerCross); 
-    
+    if (!cells.includes(null)) {
+      setEndGameMessage("Draw");
+      sendGameResult("Draw");
+    }
   }, [cells]);
 
   const nextGameRound = (index: number) => {
+    console.log(player.symbol);
+    
     if (cells[index]){
       return;
     }
@@ -42,14 +59,12 @@ export default function Field() {
       cells[index] = player.symbol;
       return [...cells];
     })
-    setSvgs((svgs)=>{
-      svgs[index] = svg_coices[player.symbol];
-      return [...svgs]
-    })
   }
 
   const checkWin = (symbol : string) => {
     console.log(cells, symbol, cells[0] == symbol && cells[1] == symbol && cells[2] == symbol);
+    
+    setPlayer(player.symbol === PlayerSymbol.Cross?playerCircle:playerCross);
     
     if (
       cells[0] == symbol && cells[1] == symbol && cells[2] == symbol ||
@@ -66,24 +81,55 @@ export default function Field() {
     return false;
   }
   
+  const restartGame = () => {
+    setCells(new Array(9).fill(null));
+    setEndGameMessage(null);
+    setPlayer(playerCircle);
+  }
+  return (
+    <div className="wrapper">
+      <div className="field" >
 
-  return ( 
-    <div className="field" >
-      {
-        cells.map((value, index) =>(
-          <Cell key={index} id={index.toString()} handleClick={(index: number) => {nextGameRound(index)}} value={cells[index]} svg_element={svgs[index]}/>
-        ))
-      }
-      <div className={!winner ? "winner winner__hidden" : "winner"}>Winner {winner?.symbol}</div>
-    </div>
+        {
+          <EndGameBanner 
+            className={endGameMessage !== null? "visible_banner":"none_banner"} 
+            winner={endGameMessage}
+            restartGame={restartGame}
+            gameResult={endGameMessage}
+          />
+        }
+        {
+          cells.map((value, index) =>(
+            <Cell 
+              key={index} 
+              id={index.toString()} 
+              handleClick={(index: number) => {nextGameRound(index)}} 
+              value={value} 
+            />
+          ))
+        }
+      </div>
+    </div> 
   );
 }
 
 export enum PlayerSymbol {
-  Cross = "Cross",
-  Circle = "Circle",
+  Cross = "cross",
+  Circle = "circle",
 }
 
 export interface Player {
   symbol: PlayerSymbol,
 }
+
+export interface Svgs {
+  Cross : JSX.Element,
+  Circle : JSX.Element,
+}
+
+const GameResults = {
+  "Player cross wins" : {"result_code" : "0", "result_description": "Cross win"},
+  "Player circle wins" : {"result_code" : "1", "result_description": "Circle win"},
+  "Draw": {"result_code" : "2", "result_description": "Draw"}
+}
+

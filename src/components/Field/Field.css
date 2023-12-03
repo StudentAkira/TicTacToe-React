@@ -1,8 +1,6 @@
 .field {
   width: 20.625rem;
   height: 20.625rem;
-  border-radius: 0.9375rem;
-  background: var(--field-background-color);
 
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -11,14 +9,11 @@
   justify-items: center;
 
   position: relative;
-}
-.winner {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  overflow: hidden;
 }
 
-.winner__hidden {
-  display: none;
+.wrapper {
+  border-radius: 1rem;
+  background: var(--field-background-color, #d7b9d5);
+  padding: 0.3125rem;
 }

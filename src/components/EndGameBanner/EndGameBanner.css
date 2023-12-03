@@ -1,0 +1,33 @@
+.end_game_banner {
+  display: flex;
+  flex-direction: column;
+  width: 20.625rem;
+  height: 20.625rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+
+  border-radius: 0.9375rem;
+  background: var(--end-game-background-color, #ada7c9);
+  font-weight: 600;
+  font-size: 2rem;
+}
+
+.visible_banner {
+  background: #ada7c9f0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: 0.5s;
+}
+
+.none_banner {
+  position: absolute;
+  top: -100%;
+  left: 0%;
+}
+
+.end_game_banner:hover {
+  cursor: default;
+}

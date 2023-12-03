@@ -2,8 +2,8 @@
   width: 6.25rem;
   height: 6.25rem;
 
-  border-radius: 0.9375rem;
-  background: var(--cell-background-color);
+  border-radius: 1rem;
+  background: var(--cell-background-color, #64a6bd);
 
   display: flex;
   justify-content: center;
