@@ -2,9 +2,15 @@ import { useEffect, useState } from "react";
 
 import Cell from "../Cell/Cell";
 import EndGameBanner from "../EndGameBanner/EndGameBanner";
+import GameTable from "../StatisticTable/GameTable";
 
 import "./Field.css"
-import { APIEndpoints } from "../../App";
+
+import { Game, Player } from "./Interfaces";
+import { PlayerSymbol } from "./Enums";
+import { APIEndpoints } from "../../Enums";
+import ResultsTableLoadingBar from "../LoadingBars/ResultsTableLoadingBar";
+
 
 
 export default function Field() {
@@ -16,6 +22,8 @@ export default function Field() {
 
   const [player, setPlayer] = useState<Player>(playerCircle);
   const [endGameMessage, setEndGameMessage] = useState<string|null>(null);
+  const [games, setGames] = useState<Game[]>([]);
+
   
   const sendGameResult = (message : string) => {
 
@@ -23,8 +31,8 @@ export default function Field() {
     formdata.append("result_code", GameResults[message as keyof typeof GameResults].result_code);
     formdata.append("result_description", GameResults[message as keyof typeof GameResults].result_description);
 
-    console.log(GameResults[message as keyof typeof GameResults].result_code);
-    console.log(GameResults[message as keyof typeof GameResults].result_description);
+    // console.log(GameResults[message as keyof typeof GameResults].result_code);
+    // console.log(GameResults[message as keyof typeof GameResults].result_description);
     
 
     fetch(APIEndpoints.result, {
@@ -37,7 +45,27 @@ export default function Field() {
       .catch(error => console.log('error', error));
   }
 
+  const getGames = async () => {
+    setLoading(true);
+    const response = await fetch(APIEndpoints.result, {
+      method: 'GET',
+      redirect: 'manual',
+    })
+    const fetched_games = await response.json();
+    setLoading(false);
+    setGames(fetched_games["games"])
+  }
+
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
+    getGames();
+  }, [])
+
+  useEffect(() => {
+    if (!cells.includes(null) || checkWin(player.symbol)){
+      setTimeout(getGames, 500);
+    }
     if (checkWin(player.symbol)){
       setEndGameMessage("Player " + player.symbol + " wins");
       sendGameResult("Player " + player.symbol + " wins");
@@ -47,10 +75,11 @@ export default function Field() {
       setEndGameMessage("Draw");
       sendGameResult("Draw");
     }
+    setPlayer(player.symbol === PlayerSymbol.Cross?playerCircle:playerCross);
   }, [cells]);
 
   const nextGameRound = (index: number) => {
-    console.log(player.symbol);
+    // console.log(player.symbol);
     
     if (cells[index]){
       return;
@@ -62,9 +91,8 @@ export default function Field() {
   }
 
   const checkWin = (symbol : string) => {
-    console.log(cells, symbol, cells[0] == symbol && cells[1] == symbol && cells[2] == symbol);
+    // console.log(cells, symbol, cells[0] == symbol && cells[1] == symbol && cells[2] == symbol);
     
-    setPlayer(player.symbol === PlayerSymbol.Cross?playerCircle:playerCross);
     
     if (
       cells[0] == symbol && cells[1] == symbol && cells[2] == symbol ||
@@ -86,45 +114,35 @@ export default function Field() {
     setEndGameMessage(null);
     setPlayer(playerCircle);
   }
+
   return (
     <div className="wrapper">
-      <div className="field" >
+      <div className="field_wrapper">
+        <div className="field" >
 
-        {
-          <EndGameBanner 
-            className={endGameMessage !== null? "visible_banner":"none_banner"} 
-            winner={endGameMessage}
-            restartGame={restartGame}
-            gameResult={endGameMessage}
-          />
-        }
-        {
-          cells.map((value, index) =>(
-            <Cell 
-              key={index} 
-              id={index.toString()} 
-              handleClick={(index: number) => {nextGameRound(index)}} 
-              value={value} 
+          {
+            <EndGameBanner 
+              className={endGameMessage !== null? "visible_banner":"none_banner"} 
+              winner={endGameMessage}
+              restartGame={restartGame}
+              gameResult={endGameMessage}
             />
-          ))
-        }
-      </div>
-    </div> 
+          }
+          {
+            cells.map((value, index) =>(
+              <Cell 
+                key={index} 
+                id={index.toString()} 
+                handleClick={(index: number) => {nextGameRound(index)}} 
+                value={value} 
+              />
+            ))
+          }
+        </div>
+      </div> 
+      {loading?<ResultsTableLoadingBar />:<GameTable games={games} />}
+    </div>
   );
-}
-
-export enum PlayerSymbol {
-  Cross = "cross",
-  Circle = "circle",
-}
-
-export interface Player {
-  symbol: PlayerSymbol,
-}
-
-export interface Svgs {
-  Cross : JSX.Element,
-  Circle : JSX.Element,
 }
 
 const GameResults = {

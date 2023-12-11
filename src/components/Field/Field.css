@@ -1,6 +1,10 @@
+:root {
+  --field-size: 20.625rem;
+}
+
 .field {
-  width: 20.625rem;
-  height: 20.625rem;
+  width: var(--field-size);
+  height: var(--field-size);
 
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -12,8 +16,20 @@
   overflow: hidden;
 }
 
-.wrapper {
+.field_wrapper {
   border-radius: 1rem;
   background: var(--field-background-color, #d7b9d5);
   padding: 0.3125rem;
+
+  grid-column: 2/3;
+  grid-row: 2/3;
+}
+
+.wrapper {
+  display: grid;
+  grid-template-rows: 1fr var(--field-size) 1fr;
+  grid-template-columns: 1fr var(--field-size) 1fr;
+  justify-items: center;
+  gap: 2rem;
+  place-items: center;
 }

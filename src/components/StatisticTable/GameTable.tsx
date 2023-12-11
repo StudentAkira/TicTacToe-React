@@ -1,34 +1,24 @@
-import { useEffect, useState } from "react";
+import { Game } from '../Field/Interfaces'
 import './GameTable.css'
-import { APIEndpoints } from "../../App";
 
-function GameTable() {
+function GameTable(props : propItems) {
 
-  let games = []//JSON.parse(result)["games"]
-
-  useEffect(() => {
-
-    const getGames = async () => {
-      const response = await fetch(APIEndpoints.result, {
-        method: 'GET',
-        redirect: 'follow',
-      })
-      games = await response.json()//TODO
-    }
-    getGames();
-  }, [])
-  
-  
   return (
-    <>
+    <div className="results_wrapper">
       <h1> :: HISTORY :: </h1>
       {
-        games.map((game, index) => {
-          <h2>{game}, {index}</h2>
-        })
+        props.games.map(
+          (game, index) => {
+            return (<h2 key={index}>{game.result_code}, {game.result_description}, {index}</h2>)
+          }
+        )
       }
-    </>
+    </div>
   )
 }
 
 export default GameTable
+
+interface propItems {
+  games: Array<Game>
+}

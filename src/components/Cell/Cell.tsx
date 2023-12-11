@@ -1,4 +1,4 @@
-import { PlayerSymbol } from "../Field/Field";
+import { PlayerSymbol } from "../Field/Enums";
 import PlayerMark from "../PlayerMark/PlayerMark";
 import "./Cell.css"
 
